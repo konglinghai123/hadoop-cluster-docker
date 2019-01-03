@@ -9,8 +9,10 @@ sudo docker rm -f hadoop-master &> /dev/null
 echo "start hadoop-master container..."
 sudo docker run -itd \
                 --net=hadoop \
+                --privileged=true \
                 -p 50070:50070 \
                 -p 8088:8088 \
+                -p 9000:9000 \
                 --name hadoop-master \
                 --hostname hadoop-master \
                 kiwenlau/hadoop:1.0 &> /dev/null
@@ -24,11 +26,20 @@ do
 	echo "start hadoop-slave$i container..."
 	sudo docker run -itd \
 	                --net=hadoop \
+	                --privileged=true \
 	                --name hadoop-slave$i \
 	                --hostname hadoop-slave$i \
 	                kiwenlau/hadoop:1.0 &> /dev/null
 	i=$(( $i + 1 ))
-done 
+done
 
+#  start the hadoop cluster
+sudo docker exec -it hadoop-master ./start-hadoop.sh
+
+sudo docker exec -it hadoop-master hadoop fs -chmod 777 /
 # get into hadoop master container
 sudo docker exec -it hadoop-master bash
+
+
+
+
